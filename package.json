@@ -4,7 +4,7 @@
   "packageManager": "pnpm@12.5.1",
   "scripts": {
     "matrix": "node scripts/matrix.mjs",
-    "publish": "node scripts/publish.mjs"
+    "publish:images": "node scripts/publish.mjs"
   },
   "devDependencies": {
     "yaml": "2.8.1"
