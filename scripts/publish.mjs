@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { loadPublishedTags } from "./registry.mjs";
+import { loadPublishTargets } from "./registry.mjs";
 import {
   latestInMajor,
   latestInMinor,
@@ -10,10 +10,7 @@ import {
 const pnpmVersion = process.env.PNPM_VERSION;
 const variant = process.env.VARIANT;
 
-const githubOwner = process.env.GITHUB_REPOSITORY_OWNER;
 const githubRepository = process.env.GITHUB_REPOSITORY;
-
-const imageName = process.env.IMAGE_NAME ?? "pnpm-node";
 
 if (!pnpmVersion) {
   throw new Error("PNPM_VERSION is required");
@@ -23,20 +20,14 @@ if (!variant) {
   throw new Error("VARIANT is required");
 }
 
-if (!githubOwner) {
-  throw new Error("GITHUB_REPOSITORY_OWNER is required");
-}
-
 const versions = loadVersions();
-const published = await loadPublishedTags();
+const targets = await loadPublishTargets();
 
 const pnpmMajor = pnpmVersion.split(".")[0];
 const pnpmMinor = pnpmVersion.split(".").slice(0, 2).join(".");
 
 const latestMinorVersion = latestInMinor(pnpmVersion, versions.pnpm);
 const latestMajorVersion = latestInMajor(pnpmVersion, versions.pnpm);
-
-const ghcrImage = `ghcr.io/${githubOwner.toLowerCase()}/${imageName}`;
 
 for (const nodeVersion of versions.node) {
   const nodeMajor = nodeVersion.split(".")[0];
@@ -59,17 +50,25 @@ for (const nodeVersion of versions.node) {
     tags.push(`${nodeMajor}-${pnpmMajor}-${variant}`);
   }
 
-  if (published.has(tags[0])) {
-    console.info();
-    console.info(`Skipping ${ghcrImage}:${tags[0]}, it is already published`);
+  // Each registry is decided on its own, so a tag that is missing from one
+  // registry is published there even when the other registry already has it.
+  const missing = targets.filter((target) => !target.published.has(tags[0]));
+  const skipped = targets.filter((target) => target.published.has(tags[0]));
 
+  for (const target of skipped) {
+    console.info();
+    console.info(
+      `Skipping ${target.image}:${tags[0]}, it is already published`,
+    );
+  }
+
+  if (missing.length === 0) {
     continue;
   }
 
-  const tagArguments = tags.flatMap((tag) => [
-    "--tag",
-    `${ghcrImage}:${tag}`,
-  ]);
+  const tagArguments = missing.flatMap((target) =>
+    tags.flatMap((tag) => ["--tag", `${target.image}:${tag}`]),
+  );
 
   console.info();
   console.info(`Node:    ${nodeVersion}`);
@@ -77,8 +76,10 @@ for (const nodeVersion of versions.node) {
   console.info(`Variant: ${variant}`);
   console.info("Tags:");
 
-  for (const tag of tags) {
-    console.info(`  ${ghcrImage}:${tag}`);
+  for (const target of missing) {
+    for (const tag of tags) {
+      console.info(`  ${target.image}:${tag}`);
+    }
   }
 
   const args = [

@@ -1,34 +1,96 @@
 import { Buffer } from "node:buffer";
 
-const registry = "https://ghcr.io";
+function imageName() {
+  return (process.env.IMAGE_NAME ?? "pnpm-node").toLowerCase();
+}
+
+/**
+ * The registries this project publishes to.
+ *
+ * A registry is a target only when its repository is known, so a run without
+ * DOCKERHUB_USERNAME publishes to GHCR only.
+ */
+
+const registries = [
+  {
+    key: "ghcr",
+    label: "GHCR",
+    host: "ghcr.io",
+    api: "https://ghcr.io",
+    tokenUrl: "https://ghcr.io/token",
+    tokenService: "ghcr.io",
+
+    repository() {
+      const owner = process.env.GITHUB_REPOSITORY_OWNER;
+
+      if (!owner) {
+        return undefined;
+      }
+
+      return `${owner.toLowerCase()}/${imageName()}`;
+    },
+
+    credentials() {
+      const token = process.env.GITHUB_TOKEN;
+
+      if (!token) {
+        return undefined;
+      }
+
+      return {
+        username: process.env.GITHUB_ACTOR ?? "x-access-token",
+        password: token,
+      };
+    },
+  },
+  {
+    key: "dockerhub",
+    label: "Docker Hub",
+    host: "docker.io",
+    api: "https://registry-1.docker.io",
+    tokenUrl: "https://auth.docker.io/token",
+    tokenService: "registry.docker.io",
+
+    repository() {
+      const username = process.env.DOCKERHUB_USERNAME;
+
+      if (!username) {
+        return undefined;
+      }
+
+      return `${username.toLowerCase()}/${imageName()}`;
+    },
+
+    credentials() {
+      const username = process.env.DOCKERHUB_USERNAME;
+      const password = process.env.DOCKERHUB_TOKEN;
+
+      if (!username || !password) {
+        return undefined;
+      }
+
+      return { username, password };
+    },
+  },
+];
 
 export function forceRebuild() {
   return process.env.FORCE_REBUILD === "true";
 }
 
-export function repositoryPath() {
-  const owner = process.env.GITHUB_REPOSITORY_OWNER;
-  const imageName = process.env.IMAGE_NAME ?? "pnpm-node";
+async function fetchPullToken(registry, repository) {
+  const url = new URL(registry.tokenUrl);
 
-  if (!owner) {
-    return undefined;
-  }
-
-  return `${owner.toLowerCase()}/${imageName.toLowerCase()}`;
-}
-
-async function fetchPullToken(repository) {
-  const url = new URL(`${registry}/token`);
-
-  url.searchParams.set("service", "ghcr.io");
+  url.searchParams.set("service", registry.tokenService);
   url.searchParams.set("scope", `repository:${repository}:pull`);
 
   const headers = {};
-  const token = process.env.GITHUB_TOKEN;
+  const credentials = registry.credentials();
 
-  if (token) {
-    const actor = process.env.GITHUB_ACTOR ?? "x-access-token";
-    const basic = Buffer.from(`${actor}:${token}`).toString("base64");
+  if (credentials) {
+    const basic = Buffer.from(
+      `${credentials.username}:${credentials.password}`,
+    ).toString("base64");
 
     headers.authorization = `Basic ${basic}`;
   }
@@ -37,7 +99,7 @@ async function fetchPullToken(repository) {
 
   if (!response.ok) {
     throw new Error(
-      `Could not get a pull token for ${repository}: ${response.status} ${response.statusText}`,
+      `Could not get a pull token for ${registry.host}/${repository}: ${response.status} ${response.statusText}`,
     );
   }
 
@@ -46,7 +108,7 @@ async function fetchPullToken(repository) {
   return body.token;
 }
 
-function nextPageUrl(header) {
+function nextPageUrl(registry, header) {
   if (!header) {
     return undefined;
   }
@@ -57,30 +119,20 @@ function nextPageUrl(header) {
     return undefined;
   }
 
-  return new URL(match[1], registry).toString();
+  return new URL(match[1], registry.api).toString();
 }
 
 /**
- * Every tag that already exists in the registry.
+ * Every tag that already exists in one registry.
  *
- * A repository that has never been published returns 404, which means no tags
- * exist yet rather than an error.
+ * A repository that has never been published answers 404 on GHCR and 401 on
+ * Docker Hub, which means no tags exist yet rather than an error.
  */
-export async function fetchPublishedTags() {
-  const repository = repositoryPath();
-
-  if (!repository) {
-    console.error(
-      "GITHUB_REPOSITORY_OWNER is not set, so no published tags are known",
-    );
-
-    return new Set();
-  }
-
-  const token = await fetchPullToken(repository);
+async function fetchPublishedTags(registry, repository) {
+  const token = await fetchPullToken(registry, repository);
   const tags = new Set();
 
-  let url = `${registry}/v2/${repository}/tags/list?n=1000`;
+  let url = `${registry.api}/v2/${repository}/tags/list?n=1000`;
 
   while (url) {
     const response = await fetch(url, {
@@ -90,13 +142,17 @@ export async function fetchPublishedTags() {
       },
     });
 
-    if (response.status === 404) {
+    if (response.status === 404 || response.status === 401) {
+      console.error(
+        `${registry.host}/${repository} has no tags yet (${response.status})`,
+      );
+
       return tags;
     }
 
     if (!response.ok) {
       throw new Error(
-        `Could not list tags for ${repository}: ${response.status} ${response.statusText}`,
+        `Could not list tags for ${registry.host}/${repository}: ${response.status} ${response.statusText}`,
       );
     }
 
@@ -106,21 +162,49 @@ export async function fetchPublishedTags() {
       tags.add(tag);
     }
 
-    url = nextPageUrl(response.headers.get("link"));
+    url = nextPageUrl(registry, response.headers.get("link"));
   }
 
   return tags;
 }
 
 /**
- * The tags that already exist, or an empty set when a rebuild is forced.
+ * Every registry to publish to, with the tags it already holds.
+ *
+ * Each registry is checked on its own, so a tag that exists in one registry and
+ * not in the other is still built for the registry that is missing it.
  */
-export async function loadPublishedTags() {
-  if (forceRebuild()) {
-    console.error("FORCE_REBUILD is set, so every image is rebuilt");
+export async function loadPublishTargets() {
+  const rebuild = forceRebuild();
 
-    return new Set();
+  if (rebuild) {
+    console.error("FORCE_REBUILD is set, so every image is rebuilt");
   }
 
-  return await fetchPublishedTags();
+  const targets = [];
+
+  for (const registry of registries) {
+    const repository = registry.repository();
+
+    if (!repository) {
+      continue;
+    }
+
+    targets.push({
+      key: registry.key,
+      label: registry.label,
+      image: `${registry.host}/${repository}`,
+      published: rebuild
+        ? new Set()
+        : await fetchPublishedTags(registry, repository),
+    });
+  }
+
+  if (targets.length === 0) {
+    throw new Error(
+      "No registry is configured: set GITHUB_REPOSITORY_OWNER, DOCKERHUB_USERNAME, or both",
+    );
+  }
+
+  return targets;
 }

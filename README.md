@@ -20,7 +20,7 @@ The official Node.js Docker images don't include pnpm, and pnpm doesn't currentl
 ## Quick start
 
 ```dockerfile
-FROM ghcr.io/nicklpeterson/pnpm-node:26-12-alpine
+FROM nicklpeterson/pnpm-node:26-12-alpine 
 
 WORKDIR /app
 
@@ -35,7 +35,12 @@ CMD ["pnpm", "start"]
 
 Or pull an image directly:
 
+
 ```bash
+# Docker Hub
+docker pull nicklpeterson/pnpm-node:26-12-alpine
+
+# Github Container Repository
 docker pull ghcr.io/nicklpeterson/pnpm-node:26-12-alpine
 ```
 
@@ -235,7 +240,9 @@ The GitHub Actions workflow generates the build matrix from that file and publis
 
 ### Existing images are not rebuilt
 
-Before the workflow builds anything, it lists the tags that already exist in the registry. If the fully pinned tag for a combination is present, the workflow skips that build. A push that adds one pnpm version therefore builds only the new images.
+Before the workflow builds anything, it lists the tags that already exist in each registry. If the fully pinned tag for a combination is present, the workflow skips that build. A push that adds one pnpm version therefore builds only the new images.
+
+Each registry is checked on its own. If a tag exists on GitHub Container Registry but not on Docker Hub, the workflow builds it and pushes it to Docker Hub only, and the other way round.
 
 The check uses the fully pinned tag, for example `26.9.0-12.5.1-alpine`, because that tag names the exact build inputs. Floating tags such as `26-12-alpine` still move, because the build that owns them is a new build.
 
@@ -243,19 +250,23 @@ The check uses the fully pinned tag, for example `26.9.0-12.5.1-alpine`, because
 
 The official `node:` base images receive security updates under the same tag. To pick those up, run the `Publish` workflow manually and set `force_rebuild` to `true`. The workflow then rebuilds and republishes every combination.
 
-## Container registry
+## Container registries
 
-Images are published to GitHub Container Registry:
+The same images and tags are published to GitHub Container Registry and to Docker Hub:
 
 ```text
 ghcr.io/nicklpeterson/pnpm-node
+docker.io/nicklpeterson/pnpm-node
 ```
 
 For example:
 
 ```bash
 docker pull ghcr.io/nicklpeterson/pnpm-node:26-12-bookworm
+docker pull nicklpeterson/pnpm-node:26-12-bookworm
 ```
+
+The workflow needs two repository secrets for the Docker Hub push: `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`. The token is a Docker Hub personal access token with read and write access.
 
 ## Contributing
 
