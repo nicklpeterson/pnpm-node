@@ -10,7 +10,7 @@ on:
       - Dockerfile
       - versions.yml
       - package.json
-      - package-lock.json
+      - pnpm-lock.yaml
       - scripts/**
       - .github/workflows/publish.yml
 
@@ -29,21 +29,18 @@ jobs:
       matrix: ${{ steps.matrix.outputs.matrix }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v5
+      - uses: pnpm/setup@v3
         with:
-          node-version: 24
-          cache: npm
-
-      - run: npm ci
+          runtime: node@24
+          cache: true
 
       - id: matrix
-        run: echo "matrix=$(npm run --silent matrix)" >> "$GITHUB_OUTPUT"
+        run: echo "matrix=$(pnpm --silent matrix)" >> "$GITHUB_OUTPUT"
 
   publish:
     needs: prepare
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -56,14 +53,12 @@ jobs:
       VARIANT: ${{ matrix.variant }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v5
+      - uses: pnpm/setup@v3
         with:
-          node-version: 24
-          cache: npm
-
-      - run: npm ci
+          runtime: node@24
+          cache: true
 
       - name: Log in to GHCR
         uses: docker/login-action@v4
@@ -77,4 +72,4 @@ jobs:
       - uses: docker/setup-buildx-action@v4
 
       - name: Build and publish
-        run: npm run publish
+        run: pnpm publish
