@@ -206,5 +206,17 @@ export async function loadPublishTargets() {
     );
   }
 
+  console.error(
+    `Registries: ${targets.map((target) => target.image).join(", ")}`,
+  );
+
+  for (const registry of registries) {
+    if (!targets.some((target) => target.key === registry.key)) {
+      console.error(
+        `${registry.label} is not configured, so nothing is published there`,
+      );
+    }
+  }
+
   return targets;
 }

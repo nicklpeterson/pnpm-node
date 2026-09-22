@@ -266,8 +266,6 @@ docker pull ghcr.io/nicklpeterson/pnpm-node:26-12-bookworm
 docker pull nicklpeterson/pnpm-node:26-12-bookworm
 ```
 
-The workflow needs two repository secrets for the Docker Hub push: `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`. The token is a Docker Hub personal access token with read and write access.
-
 ## Contributing
 
 Issues and pull requests are welcome.
