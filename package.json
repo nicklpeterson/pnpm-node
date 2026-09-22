@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "matrix": "node scripts/matrix.mjs",
+    "publish": "node scripts/publish.mjs"
+  },
+  "devDependencies": {
+    "yaml": "2.8.1"
+  }
+}
