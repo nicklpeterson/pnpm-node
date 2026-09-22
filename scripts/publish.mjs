@@ -21,10 +21,6 @@ if (!variant) {
   throw new Error("VARIANT is required");
 }
 
-if (!dockerHubUsername) {
-  throw new Error("DOCKERHUB_USERNAME is required");
-}
-
 if (!githubOwner) {
   throw new Error("GITHUB_REPOSITORY_OWNER is required");
 }
