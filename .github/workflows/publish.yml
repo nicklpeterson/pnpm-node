@@ -2,6 +2,11 @@ name: Publish
 
 on:
   workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: Rebuild every image, even when the tag already exists
+        type: boolean
+        default: false
 
   push:
     branches:
@@ -20,6 +25,7 @@ permissions:
 
 env:
   IMAGE_NAME: pnpm-node
+  FORCE_REBUILD: ${{ inputs.force_rebuild || false }}
 
 jobs:
   prepare:
@@ -27,6 +33,7 @@ jobs:
 
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
+      count: ${{ steps.matrix.outputs.count }}
 
     steps:
       - uses: actions/checkout@v6
@@ -37,10 +44,17 @@ jobs:
           cache: true
 
       - id: matrix
-        run: echo "matrix=$(pnpm --silent matrix)" >> "$GITHUB_OUTPUT"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          matrix="$(pnpm --silent matrix)"
+
+          echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"
+          echo "count=$(jq '.include | length' <<< "${matrix}")" >> "$GITHUB_OUTPUT"
 
   publish:
     needs: prepare
+    if: needs.prepare.outputs.count != '0'
     runs-on: ubuntu-latest
 
     strategy:
@@ -72,4 +86,6 @@ jobs:
       - uses: docker/setup-buildx-action@v4
 
       - name: Build and publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm run publish:images

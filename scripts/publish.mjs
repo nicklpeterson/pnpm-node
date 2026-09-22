@@ -1,8 +1,10 @@
 import { spawnSync } from "node:child_process";
+import { loadPublishedTags } from "./registry.mjs";
 import {
   latestInMajor,
   latestInMinor,
   loadVersions,
+  pinnedTag,
 } from "./versions.mjs";
 
 const pnpmVersion = process.env.PNPM_VERSION;
@@ -26,6 +28,7 @@ if (!githubOwner) {
 }
 
 const versions = loadVersions();
+const published = await loadPublishedTags();
 
 const pnpmMajor = pnpmVersion.split(".")[0];
 const pnpmMinor = pnpmVersion.split(".").slice(0, 2).join(".");
@@ -40,7 +43,7 @@ for (const nodeVersion of versions.node) {
 
   const tags = [
     // Fully pinned
-    `${nodeVersion}-${pnpmVersion}-${variant}`,
+    pinnedTag(nodeVersion, pnpmVersion, variant),
 
     // Node major + exact pnpm
     `${nodeMajor}-${pnpmVersion}-${variant}`,
@@ -54,6 +57,13 @@ for (const nodeVersion of versions.node) {
   // Example: 26-12-alpine
   if (pnpmVersion === latestMajorVersion) {
     tags.push(`${nodeMajor}-${pnpmMajor}-${variant}`);
+  }
+
+  if (published.has(tags[0])) {
+    console.info();
+    console.info(`Skipping ${ghcrImage}:${tags[0]}, it is already published`);
+
+    continue;
   }
 
   const tagArguments = tags.flatMap((tag) => [

@@ -46,3 +46,13 @@ export function latestInMajor(version, versions) {
     .sort(compareVersions)
     .at(-1);
 }
+
+/**
+ * The tag that pins Node.js, pnpm, and the variant exactly.
+ *
+ * This tag maps one to one onto the build inputs, so its presence in the
+ * registry means the image was already built.
+ */
+export function pinnedTag(nodeVersion, pnpmVersion, variant) {
+  return `${nodeVersion}-${pnpmVersion}-${variant}`;
+}
