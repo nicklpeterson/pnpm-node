@@ -7,7 +7,7 @@ Up-to-date Docker images with **Node.js + pnpm preinstalled**.
 <a href=https://hub.docker.com/r/nicklpeterson/pnpm-node><img alt="Docker Image Version (tag)" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node/26-12-alpine?style=flat-square&label=Docker%20Hub&logo=docker&color=1D63Ed"></a> <a href=https://ghcr.io/nicklpeterson/pnpm-node:26-12-alpine><img alt="Docker Image Version (tag)" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node/26-12-alpine?style=flat-square&label=ghcr.io&logo=github&color=08872B"></a>
 
 
-<a href=https://hub.docker.com/r/nicklpeterson/pnpm-node><img alt="Docker Image Version" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node?style=flat-square&label=Docker%20Hub&logo=docker&color=1D63Ed"></a> <a href=https://ghcr.io/nicklpeterson/pnpm-node:26-12-bookworm><img alt="Docker Image Version" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node?style=flat-square&label=ghcr.io&logo=github&color=08872B"></a>
+<a href=https://hub.docker.com/r/nicklpeterson/pnpm-node><img alt="Docker Image Version" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node/26-12-bookworm?style=flat-square&label=Docker%20Hub&logo=docker&color=1D63Ed"></a> <a href=https://ghcr.io/nicklpeterson/pnpm-node:26-12-bookworm><img alt="Docker Image Version" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node/26-12-bookworm?style=flat-square&label=ghcr.io&logo=github&color=08872B"></a>
 
 </div>
 
