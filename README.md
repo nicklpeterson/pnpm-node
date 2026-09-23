@@ -4,10 +4,10 @@
 
 Up-to-date Docker images with **Node.js + pnpm preinstalled**.
 
-<a href=https://hub.docker.com/r/nicklpeterson/pnpm-node><img alt="Docker Image Version (tag)" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node/26-12-alpine?style=flat-square&label=Docker%20Hub&logo=docker&color=1D63Ed"></a> <a href=https://ghcr.io/nicklpeterson/pnpm-node:26-12-alpine><img alt="Docker Image Version (tag)" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node/26-12-alpine?style=flat-square&label=ghcr.io&logo=github&color=maroon"></a>
+<a href=https://hub.docker.com/r/nicklpeterson/pnpm-node><img alt="Docker Image Version (tag)" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node/26-12-alpine?style=flat-square&label=Docker%20Hub&logo=docker&color=1D63Ed"></a> <a href=https://ghcr.io/nicklpeterson/pnpm-node:26-12-alpine><img alt="Docker Image Version (tag)" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node/26-12-alpine?style=flat-square&label=ghcr.io&logo=github&color=08872B"></a>
 
 
-<a href=https://hub.docker.com/r/nicklpeterson/pnpm-node><img alt="Docker Image Version" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node?style=flat-square&label=Docker%20Hub&logo=docker&color=1D63Ed"></a> <a href=https://ghcr.io/nicklpeterson/pnpm-node:26-12-bookworm><img alt="Docker Image Version" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node?style=flat-square&label=ghcr.io&logo=github&color=maroon"></a>
+<a href=https://hub.docker.com/r/nicklpeterson/pnpm-node><img alt="Docker Image Version" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node?style=flat-square&label=Docker%20Hub&logo=docker&color=1D63Ed"></a> <a href=https://ghcr.io/nicklpeterson/pnpm-node:26-12-bookworm><img alt="Docker Image Version" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node?style=flat-square&label=ghcr.io&logo=github&color=08872B"></a>
 
 </div>
 
@@ -55,16 +55,13 @@ CMD ["pnpm", "start"]
 You can specify major, minor or a full patch version of pnpm. 
 
 ```bash
-# Tag Format
-# <node major>-<pnpm>-<variant>
+26-12-alpine.      # Node 26 + pnpm latest v12 + Alpine
+24-11-alpine       # Node 24 + pnpm latest v11 + Alpine
 
-26-12-alpine # Node 26 + pnpm latest v12 + Alpine
-24-11-alpine # Node 24 + pnpm latest v11 + Alpine
+24-11.5-alpine     # Node 24 + pnpm latest v11.5 + Alpine
+22-12.2-bookworm   # Node 22 + pnpm latest v12.2 + Bookworm
 
-24-11.5-alpine # Node 24 + pnpm latest v11.5 + Alpine
-22-12.2-bookworm # Node 22 + pnpm latest v12.2 + Bookworm
-
-26-11.27.0-alpine # Node 26 + pnpm v11.27.0 + Alpine
+26-11.27.0-alpine  # Node 26 + pnpm v11.27.0 + Alpine
 26-12.5.1-bookworm # Node 26 + pnpm v12.5.1 + Bookworm
 ```
 
