@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer";
 
-function imageName() {
+export function imageName() {
   return (process.env.IMAGE_NAME ?? "pnpm-node").toLowerCase();
 }
 

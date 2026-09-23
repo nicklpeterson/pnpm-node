@@ -4,6 +4,7 @@ import {
   latestInMajor,
   latestInMinor,
   loadVersions,
+  majorVersion,
   pinnedTag,
 } from "./versions.mjs";
 
@@ -23,21 +24,21 @@ if (!variant) {
 const versions = loadVersions();
 const targets = await loadPublishTargets();
 
-const pnpmMajor = pnpmVersion.split(".")[0];
+const pnpmMajor = majorVersion(pnpmVersion);
 const pnpmMinor = pnpmVersion.split(".").slice(0, 2).join(".");
 
 const latestMinorVersion = latestInMinor(pnpmVersion, versions.pnpm);
 const latestMajorVersion = latestInMajor(pnpmVersion, versions.pnpm);
 
 for (const nodeVersion of versions.node) {
-  const nodeMajor = nodeVersion.split(".")[0];
+  const nodeMajor = majorVersion(nodeVersion);
 
+  // Node.js is tagged by major only. The exact Node.js version still decides
+  // what is built, so a Node.js patch release needs a forced rebuild to move
+  // these tags.
   const tags = [
-    // Fully pinned
+    // Node major + exact pnpm, for example 26-12.5.1-alpine
     pinnedTag(nodeVersion, pnpmVersion, variant),
-
-    // Node major + exact pnpm
-    `${nodeMajor}-${pnpmVersion}-${variant}`,
   ];
 
   // Example: 26-12.5-alpine

@@ -1,21 +1,38 @@
-# pnpm-node
+<h1 align="center">pnpm-node</h1>
+
+<div align="center">
 
 Up-to-date Docker images with **Node.js + pnpm preinstalled**.
 
-`pnpm-node` provides a predictable set of images covering supported Node.js releases and pnpm 11+, with Alpine and Debian Bookworm variants.
+<a href=https://hub.docker.com/r/nicklpeterson/pnpm-node><img alt="Docker Image Version (tag)" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node/26-12-alpine?style=flat-square&label=Docker%20Hub&logo=docker&color=1D63Ed"></a> <a href=https://ghcr.io/nicklpeterson/pnpm-node:26-12-alpine><img alt="Docker Image Version (tag)" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node/26-12-alpine?style=flat-square&label=ghcr.io&logo=github&color=maroon"></a>
 
-## Why?
 
-The official Node.js Docker images don't include pnpm, and pnpm doesn't currently provide a complete set of Docker images containing both Node.js and pnpm.
+<a href=https://hub.docker.com/r/nicklpeterson/pnpm-node><img alt="Docker Image Version" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node?style=flat-square&label=Docker%20Hub&logo=docker&color=1D63Ed"></a> <a href=https://ghcr.io/nicklpeterson/pnpm-node:26-12-bookworm><img alt="Docker Image Version" src="https://img.shields.io/docker/v/nicklpeterson/pnpm-node?style=flat-square&label=ghcr.io&logo=github&color=maroon"></a>
 
-`pnpm-node` fills that gap with:
+</div>
 
-* Multiple supported Node.js versions
+The official Node.js Docker images don't include pnpm, and pnpm doesn't currently provide a complete set of Docker images containing both Node.js and pnpm. 
+
+`pnpm-node` has you covered:
+
+* Node LTS 22, 24, 26 
 * pnpm 11+
-* Every published pnpm version tracked by this project
 * Alpine and Debian Bookworm variants
 * `linux/amd64` and `linux/arm64`
 * Exact and floating version tags
+
+## Latest Versions
+
+```bash
+# Docker Hub
+docker pull nicklpeterson/pnpm-node:26-12-alpine
+docker pull nicklpeterson/pnpm-node:26-12-bookworm
+
+
+# Github Container Repository
+docker pull ghcr.io/nicklpeterson/pnpm-node:26-12-alpine
+docker pull ghcr.io/nicklpeterson/pnpm-node:26-12-bookworm
+```
 
 ## Quick start
 
@@ -33,151 +50,25 @@ COPY . .
 CMD ["pnpm", "start"]
 ```
 
-Or pull an image directly:
+## Version Tags
 
+You can specify major, minor or a full patch version of pnpm. 
 
 ```bash
-# Docker Hub
-docker pull nicklpeterson/pnpm-node:26-12-alpine
+# Tag Format
+# <node major>-<pnpm>-<variant>
 
-# Github Container Repository
-docker pull ghcr.io/nicklpeterson/pnpm-node:26-12-alpine
+26-12-alpine # Node 26 + pnpm latest v12 + Alpine
+24-11-alpine # Node 24 + pnpm latest v11 + Alpine
+
+24-11.5-alpine # Node 24 + pnpm latest v11.5 + Alpine
+22-12.2-bookworm # Node 22 + pnpm latest v12.2 + Bookworm
+
+26-11.27.0-alpine # Node 26 + pnpm v11.27.0 + Alpine
+26-12.5.1-bookworm # Node 26 + pnpm v12.5.1 + Bookworm
 ```
-
-## Available variants
-
-### Alpine
-
-Small images based on the official Node.js Alpine images.
-
-```text
-26-12-alpine
-24-12-alpine
-22-11-alpine
-```
-
-### Bookworm
-
-Images based on the official Node.js Debian Bookworm images.
-
-```text
-26-12-bookworm
-24-12-bookworm
-22-11-bookworm
-```
-
-## Version tags
-
-Images are tagged at several levels of specificity.
-
-For example, an image containing:
-
-* Node.js `26.9.0`
-* pnpm `12.5.1`
-* Alpine
-
-may be available as:
-
-```text
-26-12-alpine
-26-12.5-alpine
-26-12.5.1-alpine
-26.9.0-12.5.1-alpine
-```
-
-### Major versions
-
-```text
-26-12-alpine
-```
-
-Uses the latest Node.js 26 release and latest pnpm 12 release tracked by this project.
-
-This is the simplest option if you want updates within both major release lines.
-
-```dockerfile
-FROM ghcr.io/<owner>/pnpm-node:26-12-alpine
-```
-
-### pnpm minor version
-
-```text
-26-12.5-alpine
-```
-
-Uses the latest Node.js 26 release and latest pnpm `12.5.x` release.
-
-Use this when you want pnpm patch updates without automatically moving to a new pnpm minor release.
-
-```dockerfile
-FROM ghcr.io/<owner>/pnpm-node:26-12.5-alpine
-```
-
-### Exact pnpm version
-
-```text
-26-12.5.1-alpine
-```
-
-Uses the latest Node.js 26 release tracked by the project with exactly pnpm `12.5.1`.
-
-```dockerfile
-FROM ghcr.io/<owner>/pnpm-node:26-12.5.1-alpine
-```
-
-### Exact Node.js and pnpm versions
-
-```text
-26.9.0-12.5.1-alpine
-```
-
-Pins both Node.js and pnpm.
-
-Use this form when reproducibility is most important.
-
-```dockerfile
-FROM ghcr.io/<owner>/pnpm-node:26.9.0-12.5.1-alpine
-```
-
-The same tagging scheme is available for Bookworm:
-
-```text
-26-12-bookworm
-26-12.5-bookworm
-26-12.5.1-bookworm
-26.9.0-12.5.1-bookworm
-```
-
-## Tag format
-
-```text
-<node>-<pnpm>-<variant>
-```
-
-Examples:
-
-```text
-22-11-alpine
-24-12-bookworm
-26-12.5-alpine
-26-12.5.1-bookworm
-26.9.0-12.5.1-alpine
-```
-
-## Supported architectures
-
-Images are published as multi-platform images for:
-
-```text
-linux/amd64
-linux/arm64
-```
-
-Docker will automatically select the appropriate architecture when pulling an image.
 
 ## What's in the image?
-
-The images intentionally stay close to the official Node.js Docker images.
 
 ```dockerfile
 ARG NODE_VERSION
@@ -189,7 +80,17 @@ FROM node:${NODE_VERSION}-${VARIANT}
 RUN npm install -g --allow-scripts=pnpm "pnpm@${PNPM_VERSION}"
 ```
 
-The underlying Node.js environment, entrypoint, and default command are inherited from the official Node.js image.
+
+## Supported architectures
+
+Images are published as multi-platform images for:
+
+```text
+linux/amd64
+linux/arm64
+```
+
+Docker will automatically select the appropriate architecture when pulling an image.
 
 ## Version matrix
 
@@ -227,44 +128,6 @@ combination.
 Node.js versions in `versions.yml` represent the current release tracked for each supported Node.js major.
 
 pnpm versions are retained so projects can use older pnpm releases when necessary.
-
-## Updating versions
-
-To add or update supported versions, edit:
-
-```text
-versions.yml
-```
-
-The GitHub Actions workflow generates the build matrix from that file and publishes the appropriate images and aliases.
-
-### Existing images are not rebuilt
-
-Before the workflow builds anything, it lists the tags that already exist in each registry. If the fully pinned tag for a combination is present, the workflow skips that build. A push that adds one pnpm version therefore builds only the new images.
-
-Each registry is checked on its own. If a tag exists on GitHub Container Registry but not on Docker Hub, the workflow builds it and pushes it to Docker Hub only, and the other way round.
-
-The check uses the fully pinned tag, for example `26.9.0-12.5.1-alpine`, because that tag names the exact build inputs. Floating tags such as `26-12-alpine` still move, because the build that owns them is a new build.
-
-### Forcing a rebuild
-
-The official `node:` base images receive security updates under the same tag. To pick those up, run the `Publish` workflow manually and set `force_rebuild` to `true`. The workflow then rebuilds and republishes every combination.
-
-## Container registries
-
-The same images and tags are published to GitHub Container Registry and to Docker Hub:
-
-```text
-ghcr.io/nicklpeterson/pnpm-node
-docker.io/nicklpeterson/pnpm-node
-```
-
-For example:
-
-```bash
-docker pull ghcr.io/nicklpeterson/pnpm-node:26-12-bookworm
-docker pull nicklpeterson/pnpm-node:26-12-bookworm
-```
 
 ## Contributing
 

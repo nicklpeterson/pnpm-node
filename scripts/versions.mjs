@@ -47,12 +47,19 @@ export function latestInMajor(version, versions) {
     .at(-1);
 }
 
+export function majorVersion(version) {
+  return version.split(".")[0];
+}
+
 /**
- * The tag that pins Node.js, pnpm, and the variant exactly.
+ * The tag that names the Node.js major, the exact pnpm version, and the
+ * variant.
  *
- * This tag maps one to one onto the build inputs, so its presence in the
- * registry means the image was already built.
+ * Images are tagged with the Node.js major only, so this is the most specific
+ * tag a build produces. Its presence in the registry means the combination was
+ * already built for the Node.js major, whatever Node.js patch release was
+ * current at the time.
  */
 export function pinnedTag(nodeVersion, pnpmVersion, variant) {
-  return `${nodeVersion}-${pnpmVersion}-${variant}`;
+  return `${majorVersion(nodeVersion)}-${pnpmVersion}-${variant}`;
 }
