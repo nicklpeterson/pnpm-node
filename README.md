@@ -55,7 +55,7 @@ CMD ["pnpm", "start"]
 You can specify major, minor or a full patch version of pnpm. 
 
 ```bash
-26-12-alpine.      # Node 26 + pnpm latest v12 + Alpine
+26-12-alpine       # Node 26 + pnpm latest v12 + Alpine
 24-11-alpine       # Node 24 + pnpm latest v11 + Alpine
 
 24-11.5-alpine     # Node 24 + pnpm latest v11.5 + Alpine
@@ -76,7 +76,6 @@ FROM node:${NODE_VERSION}-${VARIANT}
 
 RUN npm install -g --allow-scripts=pnpm "pnpm@${PNPM_VERSION}"
 ```
-
 
 ## Supported architectures
 
