@@ -1,0 +1,92 @@
+name: Update versions
+
+# Keep versions.yml current, then start the builds the change needs.
+#
+# A push made with GITHUB_TOKEN does not start another workflow, so merging the
+# pull request does not start Publish. This job dispatches Publish itself.
+
+on:
+  schedule:
+    # 13:00 UTC is 07:00 Central Standard Time. GitHub runs cron in UTC only, so
+    # the job runs at 08:00 Central Daylight Time.
+    - cron: "0 13 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/setup@v3
+        with:
+          runtime: node@24
+          cache: true
+
+      # The job commits on its own, so the scripts it commits are tested first.
+      - name: Run the tests
+        run: pnpm test
+
+      - name: Look for new versions
+        id: versions
+        env:
+          SUMMARY_FILE: ${{ runner.temp }}/pull-request-body.md
+        run: pnpm --silent update:versions
+
+      - name: Open a pull request and merge it
+        if: steps.versions.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: versions/${{ github.run_id }}
+          TITLE: ${{ steps.versions.outputs.title }}
+          BODY_FILE: ${{ runner.temp }}/pull-request-body.md
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git switch --create "$BRANCH"
+          git commit --all --message "$TITLE"
+          git push --set-upstream origin "$BRANCH"
+
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "$TITLE" \
+            --body-file "$BODY_FILE"
+
+          gh pr merge "$BRANCH" --squash --delete-branch
+
+      # A Node.js patch or minor release keeps every tag name, so the images of
+      # that major only move with a forced rebuild.
+      - name: Rebuild the images of the updated Node.js majors
+        if: steps.versions.outputs.rebuild_majors != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_MAJORS: ${{ steps.versions.outputs.rebuild_majors }}
+        run: |
+          gh workflow run publish.yml \
+            --ref main \
+            --field force_rebuild=true \
+            --field node_majors="$NODE_MAJORS"
+
+      # A new pnpm version and a new Node.js major produce tags that do not
+      # exist yet, so an ordinary run builds them. The majors of the forced run
+      # above are left out, which keeps the two runs from building the same
+      # image twice.
+      - name: Build the images of the new versions
+        if: steps.versions.outputs.build == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_MAJORS: ${{ steps.versions.outputs.build_majors }}
+        run: |
+          gh workflow run publish.yml \
+            --ref main \
+            --field force_rebuild=false \
+            --field node_majors="$NODE_MAJORS"
