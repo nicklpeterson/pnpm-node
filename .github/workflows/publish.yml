@@ -46,7 +46,7 @@ jobs:
 
       - uses: pnpm/setup@v3
         with:
-          runtime: node@24
+          runtime: node@26
           cache: true
 
       - id: matrix
@@ -79,7 +79,7 @@ jobs:
 
       - uses: pnpm/setup@v3
         with:
-          runtime: node@24
+          runtime: node@26
           cache: true
 
       - name: Log in to GHCR
