@@ -125,6 +125,16 @@ Node.js versions in `versions.yml` represent the current release tracked for eac
 
 pnpm versions are retained so projects can use older pnpm releases when necessary.
 
+### Automatic updates
+
+A scheduled workflow looks for new releases every morning at 07:00 Central Standard Time:
+
+* A new Node.js patch or minor release replaces the entry for that major, and the workflow rebuilds the images of that major.
+* A new Node.js major joins the list once Node.js marks it LTS.
+* A new pnpm release joins the end of the pnpm list.
+
+The workflow opens a pull request with the change, merges it, and starts the builds the change needs.
+
 ## Contributing
 
 Issues and pull requests are welcome.

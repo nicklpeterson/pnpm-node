@@ -1,12 +1,52 @@
 import fs from "node:fs";
 import YAML from "yaml";
 
+/**
+ * The Node.js majors a run is limited to, from NODE_MAJORS.
+ *
+ * An empty list means every major in versions.yml. The update job sets this so
+ * a forced rebuild moves the images of one major only, instead of every image
+ * the project publishes.
+ */
+function selectedMajors() {
+  return (process.env.NODE_MAJORS ?? "")
+    .split(",")
+    .map((major) => major.trim())
+    .filter(Boolean);
+}
+
+function selectNodeVersions(versions) {
+  const majors = selectedMajors();
+
+  if (majors.length === 0) {
+    return versions;
+  }
+
+  const selected = versions.filter((version) =>
+    majors.includes(majorVersion(version)),
+  );
+
+  const missing = majors.filter(
+    (major) => !versions.some((version) => majorVersion(version) === major),
+  );
+
+  if (missing.length > 0) {
+    throw new Error(
+      `NODE_MAJORS names ${missing.join(", ")}, which versions.yml does not hold`,
+    );
+  }
+
+  console.error(`Node.js majors limited to ${majors.join(", ")}`);
+
+  return selected;
+}
+
 export function loadVersions() {
   const contents = fs.readFileSync("versions.yml", "utf8");
   const config = YAML.parse(contents);
 
   return {
-    node: config.node.map(String),
+    node: selectNodeVersions(config.node.map(String)),
     pnpm: config.pnpm.map(String),
     variant: config.variant.map(String),
   };

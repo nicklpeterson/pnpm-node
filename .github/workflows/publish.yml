@@ -8,6 +8,11 @@ on:
         type: boolean
         default: false
 
+      node_majors:
+        description: Build these Node.js majors only, comma separated. Empty builds every major.
+        type: string
+        default: ""
+
   push:
     branches:
       - main
@@ -26,6 +31,7 @@ permissions:
 env:
   IMAGE_NAME: pnpm-node
   FORCE_REBUILD: ${{ inputs.force_rebuild || false }}
+  NODE_MAJORS: ${{ inputs.node_majors || '' }}
 
 jobs:
   prepare:
