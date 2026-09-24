@@ -5,7 +5,7 @@
   "scripts": {
     "matrix": "node scripts/matrix.mjs",
     "publish:images": "node scripts/publish.mjs",
-    "test": "node --test scripts/",
+    "test": "node --test tests/",
     "update:versions": "node scripts/update-versions.mjs"
   },
   "devDependencies": {
