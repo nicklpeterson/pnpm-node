@@ -7,9 +7,7 @@ name: Update versions
 
 on:
   schedule:
-    # 13:00 UTC is 07:00 Central Standard Time. GitHub runs cron in UTC only, so
-    # the job runs at 08:00 Central Daylight Time.
-    - cron: "0 13 * * *"
+    - cron: "23 12 * * *"
 
   workflow_dispatch:
 
